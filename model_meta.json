@@ -1,0 +1,56 @@
+{
+  "best_model": "Gradient Boosting",
+  "best_accuracy": 95.0,
+  "total_samples": 1500,
+  "test_samples": 300,
+  "comparison": {
+    "Random Forest": {
+      "accuracy": 0.93,
+      "precision": 0.9144,
+      "recall": 0.9716,
+      "f1_score": 0.9421
+    },
+    "Gradient Boosting": {
+      "accuracy": 0.95,
+      "precision": 0.9448,
+      "recall": 0.9716,
+      "f1_score": 0.958
+    },
+    "Decision Tree": {
+      "accuracy": 0.9267,
+      "precision": 0.9278,
+      "recall": 0.9489,
+      "f1_score": 0.9382
+    },
+    "Logistic Regression": {
+      "accuracy": 0.85,
+      "precision": 0.8701,
+      "recall": 0.875,
+      "f1_score": 0.8725
+    }
+  },
+  "feature_columns": [
+    "Age",
+    "Gender",
+    "MaritalStatus",
+    "Education",
+    "EmploymentType",
+    "SelfEmployed",
+    "AnnualIncome",
+    "MonthlyIncome",
+    "ExistingEMI",
+    "CreditCardUsage",
+    "NumberExistingLoans",
+    "LoanAmount",
+    "LoanPurpose",
+    "LoanTenure",
+    "CIBILScore",
+    "BankBalance",
+    "PropertyOwnership",
+    "Dependents",
+    "DebtToIncomeRatio",
+    "CreditUtilizationRatio",
+    "SavingsAmount",
+    "PreviousLoanDefaults"
+  ]
+}
