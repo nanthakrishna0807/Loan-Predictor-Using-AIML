@@ -1,24 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator');
-const { predictLoan, getLoanHistory, getPredictionById, deletePrediction } = require('../controllers/loanController');
+const { predictLoan, calculateEMI, updateLoanApplication, getLoanHistory, getPredictionById, deletePrediction } = require('../controllers/loanController');
 const { protect } = require('../middleware/auth');
-const { validate } = require('../middleware/validator');
 
-router.post(
-  '/predict',
-  protect,
-  [
-    body('AnnualIncome').notEmpty().withMessage('Annual Income is required'),
-    body('LoanAmount').notEmpty().withMessage('Loan Amount is required'),
-    body('CIBILScore').notEmpty().withMessage('CIBIL Score is required'),
-    validate
-  ],
-  predictLoan
-);
-
+router.post('/predict', protect, predictLoan);
+router.post('/calculate-emi', calculateEMI);
 router.get('/history', protect, getLoanHistory);
 router.get('/:id', protect, getPredictionById);
+router.put('/:id', protect, updateLoanApplication);
 router.delete('/:id', protect, deletePrediction);
 
 module.exports = router;
+

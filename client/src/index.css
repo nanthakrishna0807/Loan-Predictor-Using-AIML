@@ -25,24 +25,24 @@
   --input-border: #CBD5E1;
 }
 
-[data-theme="light"] .text-white,
-[data-theme="light"] h1,
-[data-theme="light"] h2,
-[data-theme="light"] h3,
-[data-theme="light"] h4,
-[data-theme="light"] h5,
-[data-theme="light"] h6 {
-  color: #0F172A !important;
+[data-theme="light"] body h1,
+[data-theme="light"] body h2,
+[data-theme="light"] body h3,
+[data-theme="light"] body h4,
+[data-theme="light"] body h5,
+[data-theme="light"] body h6 {
+  color: #0F172A;
 }
 
-[data-theme="light"] .text-slate-300,
-[data-theme="light"] .text-slate-400 {
-  color: #475569 !important;
+[data-theme="light"] .text-slate-300:not(nav *):not(.navbar *),
+[data-theme="light"] .text-slate-400:not(nav *):not(.navbar *) {
+  color: #475569;
 }
 
 [data-theme="light"] .fintech-input {
   color: #0F172A;
 }
+
 
 [data-theme="dark"] {
   --bg-main: #090D16;
@@ -172,3 +172,321 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #2563EB;
 }
+
+/* ==========================================================================
+   HEADER NAVBAR STYLING - High Contrast & Guaranteed Visibility (Light & Dark)
+   ========================================================================== */
+.custom-header-navbar,
+nav.navbar,
+[data-theme="light"] nav.navbar,
+[data-theme="dark"] nav.navbar {
+  background: rgba(15, 23, 42, 0.95) !important;
+  background-color: #0F172A !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 1050;
+}
+
+/* Brand Title & Logo */
+.custom-header-navbar .header-brand-title,
+nav.navbar .navbar-brand,
+[data-theme="light"] nav.navbar .navbar-brand,
+[data-theme="dark"] nav.navbar .navbar-brand {
+  color: #FFFFFF !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+nav.navbar .header-brand-accent {
+  color: #38BDF8 !important;
+}
+
+/* Version Badge */
+nav.navbar .header-version-badge {
+  background-color: rgba(30, 58, 138, 0.8) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  font-size: 0.75rem !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+}
+
+/* Navigation Links (Home, Features, About, Calculator, Predict, Dashboard, Analytics) */
+nav.navbar .nav-link,
+nav.navbar .header-nav-link,
+[data-theme="light"] nav.navbar .nav-link,
+[data-theme="dark"] nav.navbar .nav-link {
+  color: #CBD5E1 !important;
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out !important;
+}
+
+nav.navbar .nav-link:hover,
+nav.navbar .header-nav-link:hover,
+[data-theme="light"] nav.navbar .nav-link:hover,
+[data-theme="dark"] nav.navbar .nav-link:hover {
+  color: #38BDF8 !important;
+  background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
+/* Active Nav Link */
+nav.navbar .nav-link.active-header-link,
+nav.navbar .active-header-link,
+[data-theme="light"] nav.navbar .nav-link.active-header-link,
+[data-theme="dark"] nav.navbar .nav-link.active-header-link {
+  color: #38BDF8 !important;
+  font-weight: 600 !important;
+  background-color: rgba(37, 99, 235, 0.18) !important;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+/* User Name Text */
+nav.navbar .header-user-name,
+nav.navbar .dropdown-toggle,
+[data-theme="light"] nav.navbar .header-user-name,
+[data-theme="dark"] nav.navbar .header-user-name {
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+
+/* Theme Toggle Icon Button */
+nav.navbar .theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #F8FAFC !important;
+  transition: all 0.2s ease;
+}
+
+nav.navbar .theme-toggle-btn:hover {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  color: #38BDF8 !important;
+}
+
+/* Navbar Toggler Button (Mobile) */
+nav.navbar .navbar-toggler {
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  padding: 6px 10px;
+}
+
+nav.navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.95%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Dropdown Menu styling */
+nav.navbar .dropdown-menu {
+  background-color: #0F172A !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px;
+}
+
+nav.navbar .dropdown-menu .dropdown-item {
+  color: #E2E8F0 !important;
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+}
+
+nav.navbar .dropdown-menu .dropdown-item:hover {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  color: #38BDF8 !important;
+}
+
+/* ==========================================================================
+   FOOTER STYLING - High Contrast & Guaranteed Visibility (Light & Dark)
+   ========================================================================== */
+footer,
+footer.custom-footer,
+footer.bg-slate-950,
+[data-theme="light"] footer,
+[data-theme="dark"] footer {
+  background: #090D16 !important;
+  background-color: #090D16 !important;
+  color: #94A3B8 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+footer h5, footer h6,
+footer .h5, footer .h6,
+footer .footer-heading,
+[data-theme="light"] footer h5, [data-theme="light"] footer h6,
+[data-theme="light"] footer .footer-heading,
+[data-theme="dark"] footer h5, [data-theme="dark"] footer h6,
+[data-theme="dark"] footer .footer-heading {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+footer p, footer .footer-text, footer .text-slate-400, footer .text-slate-500,
+[data-theme="light"] footer p, [data-theme="light"] footer .footer-text,
+[data-theme="dark"] footer p, [data-theme="dark"] footer .footer-text {
+  color: #94A3B8 !important;
+}
+
+footer a, footer .footer-link, footer .footer-icon-link,
+[data-theme="light"] footer a, [data-theme="light"] footer .footer-link,
+[data-theme="dark"] footer a, [data-theme="dark"] footer .footer-link {
+  color: #CBD5E1 !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+
+footer a:hover, footer .footer-link:hover, footer .footer-icon-link:hover,
+[data-theme="light"] footer a:hover, [data-theme="dark"] footer a:hover {
+  color: #38BDF8 !important;
+}
+
+footer .footer-sublink, footer .footer-copyright p,
+[data-theme="light"] footer .footer-sublink, [data-theme="dark"] footer .footer-sublink {
+  color: #64748B !important;
+  text-decoration: none !important;
+}
+
+footer .footer-sublink:hover {
+  color: #CBD5E1 !important;
+}
+
+/* Footer CIBIL Badges */
+footer .badge,
+[data-theme="light"] footer .badge,
+[data-theme="dark"] footer .badge {
+  font-weight: 600 !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+}
+
+footer .bg-emerald-900\/50,
+[data-theme="light"] footer .bg-emerald-900\/50,
+[data-theme="dark"] footer .bg-emerald-900\/50 {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  color: #4ADE80 !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+footer .bg-sky-900\/50,
+[data-theme="light"] footer .bg-sky-900\/50,
+[data-theme="dark"] footer .bg-sky-900\/50 {
+  background-color: rgba(56, 189, 248, 0.2) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+footer .bg-amber-900\/50,
+[data-theme="light"] footer .bg-amber-900\/50,
+[data-theme="dark"] footer .bg-amber-900\/50 {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #FBBF24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+footer .bg-rose-900\/50,
+[data-theme="light"] footer .bg-rose-900\/50,
+[data-theme="dark"] footer .bg-rose-900\/50 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+/* ==========================================================================
+   GLOBAL DASHBOARD & PAGE CONTRAST ENHANCEMENTS (All Pages & Components)
+   ========================================================================== */
+
+/* Universal Button Text Visibility */
+.btn-fintech, .btn-primary, .btn-danger, .btn-success,
+.bg-gradient-to-r, .bg-blue-600 {
+  color: #FFFFFF !important;
+}
+
+/* Light Theme Dashboard Contrast */
+[data-theme="light"] .glass-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .glass-card h1,
+[data-theme="light"] .glass-card h2,
+[data-theme="light"] .glass-card h3,
+[data-theme="light"] .glass-card h4,
+[data-theme="light"] .glass-card h5,
+[data-theme="light"] .glass-card h6,
+[data-theme="light"] .glass-card .h1,
+[data-theme="light"] .glass-card .h2,
+[data-theme="light"] .glass-card .h3,
+[data-theme="light"] .glass-card .h4,
+[data-theme="light"] .glass-card .h5,
+[data-theme="light"] .glass-card .h6 {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .glass-card p,
+[data-theme="light"] .glass-card span:not(.badge):not(.btn *):not(.text-cyan-400):not(.text-blue-500):not(.text-emerald-500):not(.text-amber-500):not(.text-rose-500),
+[data-theme="light"] .glass-card div:not(.badge):not(.btn *) {
+  color: #334155;
+}
+
+[data-theme="light"] .glass-card .text-slate-300,
+[data-theme="light"] .glass-card .text-slate-400 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .table {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .table th {
+  color: #0F172A !important;
+  background-color: #F1F5F9 !important;
+  border-bottom: 2px solid #CBD5E1 !important;
+}
+
+[data-theme="light"] .table td {
+  color: #334155 !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+/* Dark Theme Dashboard Contrast */
+[data-theme="dark"] .glass-card {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .glass-card h1,
+[data-theme="dark"] .glass-card h2,
+[data-theme="dark"] .glass-card h3,
+[data-theme="dark"] .glass-card h4,
+[data-theme="dark"] .glass-card h5,
+[data-theme="dark"] .glass-card h6 {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .glass-card .text-slate-300,
+[data-theme="dark"] .glass-card .text-slate-400 {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .table {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .table th {
+  color: #F8FAFC !important;
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .table td {
+  color: #CBD5E1 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+

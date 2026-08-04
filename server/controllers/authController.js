@@ -335,4 +335,27 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
+// DELETE /api/auth/profile
+exports.deleteProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    if (getMongoStatus()) {
+      await User.findByIdAndDelete(userId);
+    } else {
+      const idx = memoryUsers.findIndex(u => u._id === userId);
+      if (idx !== -1) memoryUsers.splice(idx, 1);
+    }
+
+    return res.json({
+      success: true,
+      message: 'Account deleted successfully',
+      data: { id: userId },
+      error: null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getMemoryUsers = () => memoryUsers;
+

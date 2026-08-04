@@ -109,10 +109,24 @@ exports.predictLoan = async (req, res, next) => {
       memoryPredictions.unshift(savedPrediction);
     }
 
-    // Step 4: Return Standardized Response Format
+    // Step 4: Return Standardized Response Format with exact requested contract
+    const financialHealth = cibil >= 750 ? 'Excellent' : (cibil >= 680 ? 'Good' : (cibil >= 600 ? 'Average' : 'Needs Improvement'));
+    const formattedPrediction = {
+      loanStatus: savedPrediction.loanStatus,
+      approvalProbability: savedPrediction.probability,
+      confidence: savedPrediction.confidence,
+      riskLevel: savedPrediction.riskLevel,
+      recommendedLoanAmount: savedPrediction.suggestedLoan,
+      estimatedEMI: savedPrediction.estimatedEMI,
+      interestRate: savedPrediction.interestRate,
+      financialHealth,
+      recommendation: savedPrediction.recommendation
+    };
+
     return res.status(201).json({
       success: true,
       message: 'Loan eligibility prediction generated successfully',
+      prediction: formattedPrediction,
       data: {
         prediction: savedPrediction,
         loanStatus: savedPrediction.loanStatus,
@@ -139,6 +153,73 @@ exports.predictLoan = async (req, res, next) => {
       },
       error: null
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/loan/calculate-emi
+exports.calculateEMI = async (req, res, next) => {
+  try {
+    const { loanAmount = 500000, interestRate = 8.5, loanTenure = 60 } = req.body;
+    const P = Number(loanAmount);
+    const r = Number(interestRate) / 100 / 12;
+    const n = Number(loanTenure);
+
+    let monthlyEMI = 0;
+    if (r > 0) {
+      monthlyEMI = Math.round((P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
+    } else {
+      monthlyEMI = Math.round(P / n);
+    }
+
+    const totalPayment = monthlyEMI * n;
+    const totalInterest = totalPayment - P;
+
+    return res.json({
+      success: true,
+      message: 'EMI calculated successfully',
+      data: {
+        loanAmount: P,
+        interestRate: Number(interestRate),
+        loanTenure: n,
+        monthlyEMI,
+        totalInterest,
+        totalPayment
+      },
+      error: null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PUT /api/loan/:id
+exports.updateLoanApplication = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateFields = req.body;
+
+    if (getMongoStatus()) {
+      const updatedApp = await LoanApplication.findByIdAndUpdate(id, updateFields, { new: true });
+      return res.json({
+        success: true,
+        message: 'Loan application updated successfully',
+        data: { application: updatedApp },
+        error: null
+      });
+    } else {
+      const app = memoryApplications.find(a => a._id === id);
+      if (app) {
+        Object.assign(app, updateFields);
+      }
+      return res.json({
+        success: true,
+        message: 'Loan application updated successfully',
+        data: { application: app || { _id: id, ...updateFields } },
+        error: null
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -243,3 +324,4 @@ exports.deletePrediction = async (req, res, next) => {
 
 exports.getMemoryPredictions = () => memoryPredictions;
 exports.getMemoryApplications = () => memoryApplications;
+

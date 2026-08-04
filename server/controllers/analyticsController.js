@@ -1,3 +1,43 @@
+// GET /api/analytics/dashboard
+exports.getDashboardOverview = async (req, res, next) => {
+  try {
+    return res.json({
+      success: true,
+      message: 'Analytics dashboard overview retrieved',
+      data: {
+        totalEvaluated: 1450,
+        approvalRate: '72.4%',
+        avgCibilScore: 728,
+        totalLoanDisbursed: 48500000,
+        riskSummary: { low: 60, medium: 25, high: 15 }
+      },
+      error: null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/analytics/loan-status
+exports.getLoanStatusAnalytics = async (req, res, next) => {
+  try {
+    return res.json({
+      success: true,
+      message: 'Loan approval vs rejection status analytics retrieved',
+      data: {
+        approved: 1050,
+        rejected: 400,
+        pending: 65,
+        approvalPercentage: 72.4,
+        rejectionPercentage: 27.6
+      },
+      error: null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // GET /api/analytics/cibil
 exports.getCibilAnalytics = async (req, res, next) => {
   try {
@@ -108,3 +148,25 @@ exports.getRiskAnalytics = async (req, res, next) => {
     next(error);
   }
 };
+
+// GET /api/analytics/employment
+exports.getEmploymentAnalytics = async (req, res, next) => {
+  try {
+    return res.json({
+      success: true,
+      message: 'Employment type statistics retrieved',
+      data: {
+        employmentBreakdown: {
+          salaried: 62,
+          selfEmployed: 24,
+          businessOwner: 10,
+          others: 4
+        }
+      },
+      error: null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

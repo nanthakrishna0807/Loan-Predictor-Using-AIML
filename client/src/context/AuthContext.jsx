@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
         const user = payloadData.user;
         setToken(token);
         setUser(user);
+        localStorage.setItem('token', token);
         localStorage.setItem('loan_token', token);
         localStorage.setItem('loan_user', JSON.stringify(user));
         return { success: true, user };
@@ -58,6 +59,7 @@ export const AuthProvider = ({ children }) => {
         const user = payloadData.user;
         setToken(token);
         setUser(user);
+        localStorage.setItem('token', token);
         localStorage.setItem('loan_token', token);
         localStorage.setItem('loan_user', JSON.stringify(user));
         return { success: true, user };
@@ -76,9 +78,11 @@ export const AuthProvider = ({ children }) => {
   const logoutUser = () => {
     setToken(null);
     setUser(null);
+    localStorage.removeItem('token');
     localStorage.removeItem('loan_token');
     localStorage.removeItem('loan_user');
   };
+
 
   return (
     <AuthContext.Provider value={{ user, token, loading, loginUser, registerUser, logoutUser }}>

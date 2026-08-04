@@ -14,7 +14,13 @@ const app = express();
 app.use(helmet());
 
 // CORS Config
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
+    credentials: true,
+  })
+);
+
 
 // Morgan API Logger
 app.use(morgan('dev'));
@@ -52,8 +58,14 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/loan', require('./routes/loanRoutes'));
+app.use('/api/ml', require('./routes/mlRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+app.use('/api/report', require('./routes/reportRoutes'));
+app.use('/api/notification', require('./routes/notificationRoutes'));
+app.use('/api/settings', require('./routes/settingsRoutes'));
+
 
 // 404 Handler
 app.use((req, res, next) => {
