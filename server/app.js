@@ -56,6 +56,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/health', require('./routes/healthRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/loan', require('./routes/loanRoutes'));
 app.use('/api/ml', require('./routes/mlRoutes'));
@@ -65,6 +66,7 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/report', require('./routes/reportRoutes'));
 app.use('/api/notification', require('./routes/notificationRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
+
 
 
 // 404 Handler
