@@ -29,15 +29,17 @@ def render():
     predictions_list = []
 
     try:
-        res_stats = requests.get(f"http://127.0.0.1:{settings.PORT}/api/admin/dashboard-stats", headers=headers, timeout=4)
+        from frontend.components.theme import get_backend_url
+        base_url = get_backend_url()
+        res_stats = requests.get(f"{base_url}/api/admin/dashboard-stats", headers=headers, timeout=5)
         if res_stats.status_code == 200:
             stats = res_stats.json().get("data", {})
         
-        res_users = requests.get(f"http://127.0.0.1:{settings.PORT}/api/admin/users", headers=headers, timeout=4)
+        res_users = requests.get(f"{base_url}/api/admin/users", headers=headers, timeout=5)
         if res_users.status_code == 200:
             users_list = res_users.json().get("data", [])
 
-        res_preds = requests.get(f"http://127.0.0.1:{settings.PORT}/api/admin/predictions", headers=headers, timeout=4)
+        res_preds = requests.get(f"{base_url}/api/admin/predictions", headers=headers, timeout=5)
         if res_preds.status_code == 200:
             predictions_list = res_preds.json().get("data", [])
     except Exception:

@@ -39,8 +39,9 @@ def render():
             }
 
             try:
-                backend_url = f"http://127.0.0.1:{settings.PORT}/api/auth/register"
-                res = requests.post(backend_url, json=payload, timeout=4)
+                from frontend.components.theme import get_backend_url
+                backend_url = f"{get_backend_url()}/api/auth/register"
+                res = requests.post(backend_url, json=payload, timeout=5)
                 
                 if res.status_code == 200:
                     data = res.json()

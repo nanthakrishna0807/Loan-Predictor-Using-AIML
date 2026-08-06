@@ -25,8 +25,9 @@ def render():
     # Fetch User History
     predictions = []
     try:
+        from frontend.components.theme import get_backend_url
         headers = {"Authorization": f"Bearer {token}"} if token else {}
-        res = requests.get(f"http://127.0.0.1:{settings.PORT}/api/predict/history", headers=headers, timeout=4)
+        res = requests.get(f"{get_backend_url()}/api/predict/history", headers=headers, timeout=5)
         if res.status_code == 200:
             predictions = res.json().get("data", [])
         else:
@@ -132,8 +133,9 @@ def render():
 
             if st.button(f"🗑️ Delete Record {p_id}", key=f"del_{p_id}"):
                 try:
+                    from frontend.components.theme import get_backend_url
                     headers = {"Authorization": f"Bearer {token}"} if token else {}
-                    res_del = requests.delete(f"http://127.0.0.1:{settings.PORT}/api/predict/{p_id}", headers=headers, timeout=3)
+                    res_del = requests.delete(f"{get_backend_url()}/api/predict/{p_id}", headers=headers, timeout=4)
                     if res_del.status_code == 200:
                         st.success("Record deleted.")
                         st.rerun()

@@ -1,4 +1,23 @@
 import streamlit as st
+import os
+
+def get_backend_url() -> str:
+    """
+    Returns the backend API base URL.
+    Checks BACKEND_API_URL environment variable (Render production),
+    or falls back to localhost on settings.PORT (default 5000).
+    """
+    env_url = os.getenv("BACKEND_API_URL", "").strip()
+    if env_url:
+        return env_url.rstrip('/')
+    
+    try:
+        from backend.config import settings
+        port = getattr(settings, 'PORT', 5000)
+    except Exception:
+        port = 5000
+    
+    return f"http://127.0.0.1:{port}"
 
 def apply_banking_theme():
     """
