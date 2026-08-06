@@ -1,9 +1,23 @@
 import sys
+import os
 import urllib.parse
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
-from app.config.settings import settings
-from app.utils.logger import logger
+
+# Ensure backend directory is in sys.path
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+root_dir = os.path.dirname(backend_dir)
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
+try:
+    from app.config.settings import settings
+    from app.utils.logger import logger
+except ModuleNotFoundError:
+    from backend.app.config.settings import settings
+    from backend.app.utils.logger import logger
 
 # Ensure Windows terminal handles UTF-8 emojis cleanly
 if hasattr(sys.stdout, 'reconfigure'):
