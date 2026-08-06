@@ -26,9 +26,12 @@ def render():
     # Fetch User Prediction History
     predictions = []
     try:
-        from frontend.components.theme import get_backend_url
+        try:
+            from frontend.config import API_URL
+        except ModuleNotFoundError:
+            from config import API_URL
         headers = {"Authorization": f"Bearer {token}"} if token else {}
-        res = requests.get(f"{get_backend_url()}/api/predict/history", headers=headers, timeout=5)
+        res = requests.get(f"{API_URL}/api/predict/history", headers=headers, timeout=5)
         if res.status_code == 200:
             predictions = res.json().get("data", [])
         else:

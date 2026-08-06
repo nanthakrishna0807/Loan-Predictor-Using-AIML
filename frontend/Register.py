@@ -39,8 +39,11 @@ def render():
             }
 
             try:
-                from frontend.components.theme import get_backend_url
-                backend_url = f"{get_backend_url()}/api/auth/register"
+                try:
+                    from frontend.config import API_URL
+                except ModuleNotFoundError:
+                    from config import API_URL
+                backend_url = f"{API_URL}/api/auth/register"
                 res = requests.post(backend_url, json=payload, timeout=5)
                 
                 if res.status_code == 200:

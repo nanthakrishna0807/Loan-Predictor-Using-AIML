@@ -23,8 +23,11 @@ def render():
                     return
 
                 try:
-                    from frontend.components.theme import get_backend_url
-                    backend_url = f"{get_backend_url()}/api/auth/login"
+                    try:
+                        from frontend.config import API_URL
+                    except ModuleNotFoundError:
+                        from config import API_URL
+                    backend_url = f"{API_URL}/api/auth/login"
                     res = requests.post(backend_url, json={"email": email, "password": password}, timeout=5)
                     
                     if res.status_code == 200:

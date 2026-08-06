@@ -29,17 +29,19 @@ def render():
     predictions_list = []
 
     try:
-        from frontend.components.theme import get_backend_url
-        base_url = get_backend_url()
-        res_stats = requests.get(f"{base_url}/api/admin/dashboard-stats", headers=headers, timeout=5)
+        try:
+            from frontend.config import API_URL
+        except ModuleNotFoundError:
+            from config import API_URL
+        res_stats = requests.get(f"{API_URL}/api/admin/dashboard-stats", headers=headers, timeout=5)
         if res_stats.status_code == 200:
             stats = res_stats.json().get("data", {})
         
-        res_users = requests.get(f"{base_url}/api/admin/users", headers=headers, timeout=5)
+        res_users = requests.get(f"{API_URL}/api/admin/users", headers=headers, timeout=5)
         if res_users.status_code == 200:
             users_list = res_users.json().get("data", [])
 
-        res_preds = requests.get(f"{base_url}/api/admin/predictions", headers=headers, timeout=5)
+        res_preds = requests.get(f"{API_URL}/api/admin/predictions", headers=headers, timeout=5)
         if res_preds.status_code == 200:
             predictions_list = res_preds.json().get("data", [])
     except Exception:

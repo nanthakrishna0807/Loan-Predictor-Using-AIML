@@ -160,9 +160,12 @@ def render():
 
             result_data = None
             try:
-                from frontend.components.theme import get_backend_url
+                try:
+                    from frontend.config import API_URL
+                except ModuleNotFoundError:
+                    from config import API_URL
                 headers = {"Authorization": f"Bearer {token}"} if token else {}
-                res = requests.post(f"{get_backend_url()}/api/predict/loan", json=payload, headers=headers, timeout=5)
+                res = requests.post(f"{API_URL}/api/predict/loan", json=payload, headers=headers, timeout=5)
                 if res.status_code == 200:
                     result_data = res.json().get("data") or res.json().get("result")
                 else:

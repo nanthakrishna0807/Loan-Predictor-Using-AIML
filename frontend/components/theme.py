@@ -1,23 +1,19 @@
 import streamlit as st
 import os
 
+try:
+    from frontend.config import API_URL
+except ModuleNotFoundError:
+    try:
+        from config import API_URL
+    except ModuleNotFoundError:
+        API_URL = os.getenv("API_URL", os.getenv("BACKEND_API_URL", "https://loan-predictor-ml-model.onrender.com"))
+
 def get_backend_url() -> str:
     """
-    Returns the backend API base URL.
-    Checks BACKEND_API_URL environment variable (Render production),
-    or falls back to localhost on settings.PORT (default 5000).
+    Returns the backend API base URL from frontend.config.API_URL.
     """
-    env_url = os.getenv("BACKEND_API_URL", "").strip()
-    if env_url:
-        return env_url.rstrip('/')
-    
-    try:
-        from backend.config import settings
-        port = getattr(settings, 'PORT', 5000)
-    except Exception:
-        port = 5000
-    
-    return f"http://127.0.0.1:{port}"
+    return API_URL.rstrip('/')
 
 def apply_banking_theme():
     """

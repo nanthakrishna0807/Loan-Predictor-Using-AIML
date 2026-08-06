@@ -59,9 +59,12 @@ def render():
                     payload["new_password"] = new_pass
 
                 try:
-                    from frontend.components.theme import get_backend_url
+                    try:
+                        from frontend.config import API_URL
+                    except ModuleNotFoundError:
+                        from config import API_URL
                     headers = {"Authorization": f"Bearer {token}"} if token else {}
-                    res = requests.put(f"{get_backend_url()}/api/users/profile", json=payload, headers=headers, timeout=5)
+                    res = requests.put(f"{API_URL}/api/users/profile", json=payload, headers=headers, timeout=5)
                     if res.status_code == 200:
                         updated_user = res.json().get("user")
                         st.session_state["user"] = updated_user

@@ -25,9 +25,12 @@ def render():
     # Fetch User History
     predictions = []
     try:
-        from frontend.components.theme import get_backend_url
+        try:
+            from frontend.config import API_URL
+        except ModuleNotFoundError:
+            from config import API_URL
         headers = {"Authorization": f"Bearer {token}"} if token else {}
-        res = requests.get(f"{get_backend_url()}/api/predict/history", headers=headers, timeout=5)
+        res = requests.get(f"{API_URL}/api/predict/history", headers=headers, timeout=5)
         if res.status_code == 200:
             predictions = res.json().get("data", [])
         else:
@@ -133,9 +136,12 @@ def render():
 
             if st.button(f"🗑️ Delete Record {p_id}", key=f"del_{p_id}"):
                 try:
-                    from frontend.components.theme import get_backend_url
+                    try:
+                        from frontend.config import API_URL
+                    except ModuleNotFoundError:
+                        from config import API_URL
                     headers = {"Authorization": f"Bearer {token}"} if token else {}
-                    res_del = requests.delete(f"{get_backend_url()}/api/predict/{p_id}", headers=headers, timeout=4)
+                    res_del = requests.delete(f"{API_URL}/api/predict/{p_id}", headers=headers, timeout=4)
                     if res_del.status_code == 200:
                         st.success("Record deleted.")
                         st.rerun()
