@@ -2,13 +2,21 @@ import streamlit as st
 import os
 import sys
 
-# Ensure backend app & frontend modules are in python path
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Ensure root directory and frontend directory are in python path
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(CURRENT_DIR)
+
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
+if CURRENT_DIR not in sys.path:
+    sys.path.insert(0, CURRENT_DIR)
 
-from frontend.components.theme import apply_banking_theme
-from frontend.components.cards import render_banner, render_metric_card
+try:
+    from frontend.components.theme import apply_banking_theme
+    from frontend.components.cards import render_banner, render_metric_card
+except ModuleNotFoundError:
+    from components.theme import apply_banking_theme
+    from components.cards import render_banner, render_metric_card
 
 st.set_page_config(
     page_title="AI Loan Predictor | Enterprise Credit Assessment Portal",
