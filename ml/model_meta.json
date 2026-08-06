@@ -4,29 +4,81 @@
   "total_samples": 1500,
   "test_samples": 300,
   "comparison": {
-    "Random Forest": {
-      "accuracy": 0.93,
-      "precision": 0.9144,
+    "Logistic Regression": {
+      "model_name": "Logistic Regression",
+      "accuracy": 0.8467,
+      "precision": 0.8693,
+      "recall": 0.8693,
+      "f1_score": 0.8693,
+      "roc_auc": 0.9227,
+      "confusion_matrix": [
+        [
+          101,
+          23
+        ],
+        [
+          23,
+          153
+        ]
+      ],
+      "cv_mean_accuracy": 0.8792
+    },
+    "Decision Tree": {
+      "model_name": "Decision Tree",
+      "accuracy": 0.9233,
+      "precision": 0.9048,
       "recall": 0.9716,
-      "f1_score": 0.9421
+      "f1_score": 0.937,
+      "roc_auc": 0.9515,
+      "confusion_matrix": [
+        [
+          106,
+          18
+        ],
+        [
+          5,
+          171
+        ]
+      ],
+      "cv_mean_accuracy": 0.9317
+    },
+    "Random Forest": {
+      "model_name": "Random Forest",
+      "accuracy": 0.9367,
+      "precision": 0.9198,
+      "recall": 0.9773,
+      "f1_score": 0.9477,
+      "roc_auc": 0.9872,
+      "confusion_matrix": [
+        [
+          109,
+          15
+        ],
+        [
+          4,
+          172
+        ]
+      ],
+      "cv_mean_accuracy": 0.9375
     },
     "Gradient Boosting": {
+      "model_name": "Gradient Boosting",
       "accuracy": 0.95,
       "precision": 0.9448,
       "recall": 0.9716,
-      "f1_score": 0.958
-    },
-    "Decision Tree": {
-      "accuracy": 0.9267,
-      "precision": 0.9278,
-      "recall": 0.9489,
-      "f1_score": 0.9382
-    },
-    "Logistic Regression": {
-      "accuracy": 0.85,
-      "precision": 0.8701,
-      "recall": 0.875,
-      "f1_score": 0.8725
+      "f1_score": 0.958,
+      "roc_auc": 0.9923,
+      "confusion_matrix": [
+        [
+          114,
+          10
+        ],
+        [
+          5,
+          171
+        ]
+      ],
+      "cv_mean_accuracy": 0.9467
     }
   },
   "feature_columns": [

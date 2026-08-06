@@ -1,97 +1,117 @@
-# AI Loan Predictor – Smart Loan Eligibility Prediction System
+# AI Loan Predictor using Machine Learning (Python Stack)
 
-An end-to-end modern FinTech web application that predicts loan eligibility (`Approved` or `Rejected`) using Machine Learning algorithms (Random Forest, XGBoost / Gradient Boosting, Decision Trees, Logistic Regression). 
-
-Features dynamic **CIBIL score meter** analytics, credit risk gauge, automated financial tips, PDF report generation, Excel export, and JWT-authenticated User & Admin dashboards.
+An AI-powered Loan Prediction and Financial Credit Assessment System built entirely in Python using **FastAPI**, **Streamlit**, **Scikit-learn**, and **MongoDB Atlas**.
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## 🌟 Architecture & Features
 
-```
-AI Loan Predictor/
-├── ml/             # Python Flask ML Microservice (Port 5001)
-├── server/         # Express.js Node Backend API (Port 5000)
-└── client/         # React.js Vite Glassmorphism Frontend (Port 3000)
-```
-
-- **Frontend**: React 18, Vite, Bootstrap 5, Glassmorphic Vanilla CSS, Framer Motion, Chart.js, Lucide Icons, jsPDF, XLSX.
-- **Backend**: Node.js, Express.js, JWT Authentication, Bcrypt, Mongoose (MongoDB Atlas / Local MongoDB, with built-in resilient fallback data store).
-- **Machine Learning**: Python 3.x, Flask, Pandas, NumPy, Scikit-Learn, Joblib, GradientBoosting/XGBoost, Matplotlib.
+- **Frontend**: Interactive Streamlit web interface with custom banking CSS theme, Plotly charts, CIBIL scoring widget, user profile management, prediction history audit logs, and admin analytics dashboard.
+- **Backend**: Async FastAPI REST API server with JWT authentication, Pydantic v2 validation, Passlib bcrypt password hashing, and CORS middleware.
+- **Machine Learning**: Gradient Boosting ensemble model trained on financial indicators, calculating approval probability %, credit risk levels, DTI ratios, interest rates, recommended maximum loan amounts, and personalized financial improvement recommendations.
+- **Database**: Async Motor client for MongoDB Atlas cloud database persistence with fallback local execution.
 
 ---
 
-## ⚡ Quick Start Instructions
+## 📁 Directory Structure
 
-### 1. Train ML Model & Start Flask API (Port 5001)
+```
+loan-predictor/
+│
+├── app/
+│   ├── api/
+│   │   ├── auth.py
+│   │   ├── users.py
+│   │   ├── predict.py
+│   │   ├── admin.py
+│   │   └── health.py
+│   ├── auth/
+│   │   ├── jwt.py
+│   │   └── security.py
+│   ├── database/
+│   │   └── connection.py
+│   ├── models/
+│   │   ├── user.py
+│   │   └── prediction.py
+│   ├── schemas/
+│   │   ├── auth.py
+│   │   ├── user.py
+│   │   ├── prediction.py
+│   │   └── health.py
+│   ├── services/
+│   │   ├── auth_service.py
+│   │   ├── user_service.py
+│   │   └── prediction_service.py
+│   ├── ml/
+│   │   ├── model.pkl
+│   │   └── predictor.py
+│   ├── utils/
+│   │   ├── logger.py
+│   │   └── cibil_calculator.py
+│   ├── config.py
+│   └── main.py
+│
+├── frontend/
+│   ├── Home.py
+│   ├── Login.py
+│   ├── Register.py
+│   ├── Dashboard.py
+│   ├── LoanPrediction.py
+│   ├── PredictionHistory.py
+│   ├── Profile.py
+│   ├── AdminDashboard.py
+│   ├── components/
+│   │   ├── theme.py
+│   │   ├── cards.py
+│   │   ├── charts.py
+│   │   └── cibil_widget.py
+│   └── assets/
+│
+├── uploads/
+├── logs/
+├── requirements.txt
+├── .env.example
+├── README.md
+└── run.py
+```
+
+---
+
+## 🚀 Quick Start & Running the Project
+
+### 1. Install Python Dependencies
+
 ```bash
-cd ml
-python generate_dataset.py
-python train_model.py
-python app.py
+pip install -r requirements.txt
 ```
 
-### 2. Start Express Backend (Port 5000)
+### 2. Configure Environment (Optional)
+
+Copy `.env.example` to `.env` and set your MongoDB Atlas URI:
+
 ```bash
-cd server
-npm install
-npm run dev
+cp .env.example .env
 ```
 
-### 3. Start React Frontend (Port 3000)
+### 3. Launch Both Backend & Streamlit App
+
+Run the unified runner script:
+
 ```bash
-cd client
-npm install
-npm run dev
+python run.py
 ```
 
----
+Or launch services separately:
 
-## 🎯 Demo User Credentials
+**FastAPI Backend:**
+```bash
+python -m uvicorn app.main:app --port 5000 --reload
+```
 
-- **Applicant User**:
-  - **Email**: `demo@loanpredictor.ai`
-  - **Password**: `password`
-- **System Admin**:
-  - **Email**: `admin@loanpredictor.ai`
-  - **Password**: `admin123`
+**Streamlit Frontend:**
+```bash
+streamlit run frontend/Home.py
+```
 
----
-
-## 📊 CIBIL Score Logic & Thresholds
-
-| Range | Rating | Status & Rule |
-| :--- | :--- | :--- |
-| **750 – 900** | **Excellent** | Prime approval eligibility, lowest interest rates (~9.2% APR). |
-| **650 – 749** | **Good** | Standard approval eligibility, competitive terms. |
-| **550 – 649** | **Fair** | Below threshold (650). Rejection bias unless offset by high liquid savings. |
-| **300 – 549** | **Poor** | Automated rejection lean due to high credit risk. |
-
----
-
-## 🌐 Key API Endpoints
-
-### Authentication (`/api/auth`)
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `POST /api/auth/forgot-password`
-- `POST /api/auth/reset-password`
-
-### Loan Predictions (`/api/loan`)
-- `POST /api/loan/predict`
-- `GET /api/loan/history`
-- `GET /api/loan/:id`
-- `DELETE /api/loan/:id`
-
-### Admin Management (`/api/admin`)
-- `GET /api/admin/users`
-- `GET /api/admin/dashboard`
-- `GET /api/admin/analytics`
-- `DELETE /api/admin/user/:id`
-
-### Flask ML Microservice (`http://localhost:5001`)
-- `POST /predict`
-- `GET /model-info`
-- `GET /accuracy`
-- `POST /retrain`
+- **Frontend App**: `http://localhost:8501`
+- **FastAPI Interactive Docs**: `http://localhost:5000/docs`

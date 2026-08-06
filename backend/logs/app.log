@@ -1,0 +1,13 @@
+[2026-08-06 19:05:39] [INFO] [loan_predictor_fastapi]: ML Model loaded successfully from C:\Users\Nantha Krishna.V\OneDrive\Desktop\College Projects(Team)\AI Loan Predictor\backend\app\ml\model.pkl
+[2026-08-06 19:05:43] [INFO] [loan_predictor_fastapi]: Database connected successfully to loanpredictor at cluster0.mc7zsmo.mongodb.net
+[2026-08-06 19:05:44] [INFO] [loan_predictor_fastapi]: MongoDB Atlas connection closed.
+[2026-08-06 19:57:22] [INFO] [loan_predictor_fastapi]: ML Model loaded successfully from C:\Users\Nantha Krishna.V\OneDrive\Desktop\College Projects(Team)\AI Loan Predictor\backend\app\ml\model.pkl
+[2026-08-06 19:57:27] [INFO] [loan_predictor_fastapi]: Database connected successfully to loanpredictor at cluster0.mc7zsmo.mongodb.net
+[2026-08-06 19:57:27] [INFO] [loan_predictor_fastapi]: MongoDB Atlas connection closed.
+[2026-08-06 20:00:08] [INFO] [loan_predictor_fastapi]: ML Model loaded successfully from C:\Users\Nantha Krishna.V\OneDrive\Desktop\College Projects(Team)\AI Loan Predictor\backend\app\ml\model.pkl
+[2026-08-06 20:01:04] [INFO] [loan_predictor_fastapi]: ML Model loaded successfully from C:\Users\Nantha Krishna.V\OneDrive\Desktop\College Projects(Team)\AI Loan Predictor\backend\app\ml\model.pkl
+[2026-08-06 20:04:16] [INFO] [loan_predictor_fastapi]: ML Model loaded successfully from C:\Users\Nantha Krishna.V\OneDrive\Desktop\College Projects(Team)\AI Loan Predictor\backend\app\ml\model.pkl
+[2026-08-06 20:05:24] [INFO] [loan_predictor_fastapi]: ML Model loaded successfully from C:\Users\Nantha Krishna.V\OneDrive\Desktop\College Projects(Team)\AI Loan Predictor\backend\app\ml\model.pkl
+[2026-08-06 20:05:30] [INFO] [loan_predictor_fastapi]: ML Model loaded successfully from C:\Users\Nantha Krishna.V\OneDrive\Desktop\College Projects(Team)\AI Loan Predictor\backend\app\ml\model.pkl
+[2026-08-06 20:05:30] [INFO] [loan_predictor_fastapi]: Initializing FastAPI Backend startup sequence...
+[2026-08-06 20:05:35] [INFO] [loan_predictor_fastapi]: Database connected successfully to loanpredictor at cluster0.mc7zsmo.mongodb.net
