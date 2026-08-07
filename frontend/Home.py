@@ -11,203 +11,133 @@ if ROOT_DIR not in sys.path:
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
+# Session State Initialization
+st.session_state.setdefault("current_page", "Home")
+st.session_state.setdefault("theme", "light")
+st.session_state.setdefault("startup_done", False)
+st.session_state["_header_bar_rendered"] = False
+
 try:
-    from frontend.components.theme import apply_banking_theme
+    from frontend.components.theme import apply_banking_theme, render_top_header_bar
+    from frontend.components.sidebar import render_sidebar
+    from frontend.components.loading import render_loading_screen
     from frontend.components.cards import render_banner, render_metric_card
+    from frontend.LoanPrediction import render as render_loan_pred
+    from frontend.CibilCalculatorPage import render as render_cibil_calc
+    from frontend.About import render as render_about
+    from frontend.Contact import render as render_developer
+    from frontend.AdminDashboard import render as render_admin
+    from frontend.Login import render as render_login
+    from frontend.Register import render as render_register
+    from frontend.Dashboard import render as render_user_dashboard
+    from frontend.PredictionHistory import render as render_history
+    from frontend.Profile import render as render_profile
 except ModuleNotFoundError:
-    from components.theme import apply_banking_theme
+    from components.theme import apply_banking_theme, render_top_header_bar
+    from components.sidebar import render_sidebar
+    from components.loading import render_loading_screen
     from components.cards import render_banner, render_metric_card
+    from LoanPrediction import render as render_loan_pred
+    from CibilCalculatorPage import render as render_cibil_calc
+    from About import render as render_about
+    from Contact import render as render_developer
+    from AdminDashboard import render as render_admin
+    from Login import render as render_login
+    from Register import render as render_register
+    from Dashboard import render as render_user_dashboard
+    from PredictionHistory import render as render_history
+    from Profile import render as render_profile
 
 st.set_page_config(
-    page_title="AI Loan Predictor | Enterprise Credit Assessment Portal",
+    page_title="AI Loan Predictor | Enterprise Banking Platform",
     page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# Apply Active Light/Dark Theme CSS
 apply_banking_theme()
 
-# Initialize session state
-if "token" not in st.session_state:
-    st.session_state["token"] = None
-if "user" not in st.session_state:
-    st.session_state["user"] = None
-if "current_page" not in st.session_state:
-    st.session_state["current_page"] = "Home"
+# Page Name Constants
+PAGE_HOME        = "Home"
+PAGE_LOAN_PRED   = "LoanPrediction"
+PAGE_CIBIL       = "CibilCalculator"
+PAGE_ABOUT       = "About"
+PAGE_DEVELOPER   = "Developer"
+PAGE_ADMIN       = "AdminDashboard"
+PAGE_LOGIN       = "Login"
+PAGE_REGISTER    = "Register"
+PAGE_DASHBOARD   = "Dashboard"
+PAGE_HISTORY     = "PredictionHistory"
+PAGE_PROFILE     = "Profile"
 
-user = st.session_state.get("user")
-is_logged_in = user is not None
-is_admin = is_logged_in and user.get("role") == "admin"
+# Top Header Bar & Sidebar Navigation
+render_top_header_bar()
+render_sidebar()
 
-# Sidebar Navigation (Crisp White Background, Dark #111827 Typography)
-with st.sidebar:
-    st.markdown(
-        """
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <div style="background-color: #1E3A8A; color: #FFFFFF; font-size: 1.5rem; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">
-                🏦
-            </div>
-            <div>
-                <div style="font-size: 1.1rem; font-weight: 800; color: #111827; line-height: 1.2;">AI Loan Predictor</div>
-                <div style="font-size: 0.75rem; color: #4B5563; font-weight: 600;">Enterprise Fintech Portal</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    st.markdown("---")
-
-    # User Profile Card in Sidebar
-    if is_logged_in:
-        st.markdown(
-            f"""
-            <div style="background-color: #F8FAFC; border: 1px solid #E5E7EB; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
-                <div style="font-size: 0.8rem; color: #4B5563; font-weight: 700; text-transform: uppercase;">CURRENT USER</div>
-                <div style="font-size: 1rem; font-weight: 700; color: #111827; margin-top: 2px;">{user.get('name')}</div>
-                <div style="font-size: 0.825rem; color: #4B5563; word-break: break-all;">{user.get('email')}</div>
-                <div style="display: inline-block; background-color: #EEF4FF; color: #1E3A8A; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; margin-top: 6px;">
-                    ROLE: {user.get('role', 'user').upper()}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    # Define Navigation Options & Page Mappings
-    if is_logged_in:
-        nav_options = ["🏠 Home", "📊 Dashboard", "📝 New Loan Prediction", "📜 Prediction History", "👤 My Profile"]
-        if is_admin:
-            nav_options.append("🛡️ Admin Dashboard")
-        nav_options.append("🚪 Logout")
-    else:
-        nav_options = ["🏠 Home", "🔑 Login", "📝 Register", "📝 Quick Prediction Form"]
-
-    label_to_page = {
-        "🏠 Home": "Home",
-        "🔑 Login": "Login",
-        "📝 Register": "Register",
-        "📊 Dashboard": "Dashboard",
-        "📝 New Loan Prediction": "LoanPrediction",
-        "📝 Quick Prediction Form": "LoanPrediction",
-        "📜 Prediction History": "PredictionHistory",
-        "👤 My Profile": "Profile",
-        "🛡️ Admin Dashboard": "AdminDashboard"
-    }
-
-    page_to_label = {
-        "Home": "🏠 Home",
-        "Login": "🔑 Login",
-        "Register": "📝 Register",
-        "Dashboard": "📊 Dashboard",
-        "LoanPrediction": "📝 New Loan Prediction" if is_logged_in else "📝 Quick Prediction Form",
-        "PredictionHistory": "📜 Prediction History",
-        "Profile": "👤 My Profile",
-        "AdminDashboard": "🛡️ Admin Dashboard"
-    }
-
-    current_page = st.session_state.get("current_page", "Home")
-    target_label = page_to_label.get(current_page, "🏠 Home")
-
-    if target_label in nav_options:
-        default_index = nav_options.index(target_label)
-    else:
-        default_index = 0
-        st.session_state["current_page"] = "Home"
-
-    choice = st.radio("Enterprise Navigation", nav_options, index=default_index, key="sidebar_nav_radio")
-
-    if choice == "🚪 Logout":
-        st.session_state["token"] = None
-        st.session_state["user"] = None
-        st.session_state["current_page"] = "Home"
-        st.rerun()
-
-    new_page = label_to_page.get(choice, "Home")
-    if new_page != st.session_state["current_page"]:
-        st.session_state["current_page"] = new_page
-        st.rerun()
-
-selected_page = st.session_state.get("current_page", "Home")
-
-# Main Page Content Routing
-if selected_page == "Login":
-    try:
-        from frontend.Login import render as render_login
-    except ModuleNotFoundError:
-        from Login import render as render_login
-    render_login()
-elif selected_page == "Register":
-    try:
-        from frontend.Register import render as render_register
-    except ModuleNotFoundError:
-        from Register import render as render_register
-    render_register()
-elif selected_page == "Dashboard":
-    try:
-        from frontend.Dashboard import render as render_dashboard
-    except ModuleNotFoundError:
-        from Dashboard import render as render_dashboard
-    render_dashboard()
-elif selected_page == "LoanPrediction":
-    try:
-        from frontend.LoanPrediction import render as render_loan_pred
-    except ModuleNotFoundError:
-        from LoanPrediction import render as render_loan_pred
-    render_loan_pred()
-elif selected_page == "PredictionHistory":
-    try:
-        from frontend.PredictionHistory import render as render_history
-    except ModuleNotFoundError:
-        from PredictionHistory import render as render_history
-    render_history()
-elif selected_page == "Profile":
-    try:
-        from frontend.Profile import render as render_profile
-    except ModuleNotFoundError:
-        from Profile import render as render_profile
-    render_profile()
-elif selected_page == "AdminDashboard":
-    try:
-        from frontend.AdminDashboard import render as render_admin
-    except ModuleNotFoundError:
-        from AdminDashboard import render as render_admin
-    render_admin()
-else:
-    # Home Landing Page
+# Main Home View
+def render_home_page():
     render_banner(
-        title="Enterprise AI Loan Approval & Credit Scoring Platform",
-        subtitle="Automated credit risk assessment, CIBIL score calculation, and loan probability forecasting powered by Scikit-learn Gradient Boosting models.",
+        title="Royal Banking AI Credit Assessment Platform",
+        subtitle="Automated loan prediction, risk evaluation, and CIBIL score calculation using Scikit-learn Gradient Boosting machine learning engine.",
         icon="🏦"
     )
 
-    # Top KPI Metrics Cards
+    is_dark = st.session_state.get("theme", "light") == "dark"
+    card_bg = "#1E293B" if is_dark else "#FFFFFF"
+    border_color = "#475569" if is_dark else "#CBD5E1"
+    text_primary = "#FFFFFF" if is_dark else "#0F172A"
+    text_secondary = "#E2E8F0" if is_dark else "#0F172A"
+    title_color = "#60A5FA" if is_dark else "#1E3A8A"
+
+    # KPI Metric Cards
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        render_metric_card("Model Accuracy", "95.0%", "Gradient Boosting Trained", "#16A34A", "🎯")
+        render_metric_card("Model Accuracy", "95.0%", "Gradient Boosting Engine", "#16A34A", "🎯")
     with col2:
-        render_metric_card("CIBIL Benchmark", "750+", "Excellent Credit Rating", "#1E3A8A", "📈")
+        render_metric_card("CIBIL Benchmark", "750+", "Prime Credit Rating Tier", "#1E3A8A", "📈")
     with col3:
-        render_metric_card("Inference Latency", "< 25ms", "Real-time AI Scoring", "#2563EB", "⚡")
+        render_metric_card("Inference Latency", "< 25 ms", "Real-Time AI Predictions", "#2563EB", "⚡")
     with col4:
         render_metric_card("Database Cluster", "MongoDB Atlas", "Motor Async Driver Active", "#0EA5E9", "🗄️")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🌟 Platform Core Capabilities")
+
+    # Modern Banking Visual Banner
+    st.markdown(
+        f"""
+        <div style="background-color: {card_bg}; border: 2px solid {border_color}; border-radius: 18px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div style="flex: 1; min-width: 280px;">
+                <div style="font-size: 0.95rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: {title_color} !important; margin-bottom: 6px;">AUTOMATED CREDIT INTELLIGENCE</div>
+                <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: {text_primary} !important;">Welcome to AI Loan Assessment</h2>
+                <p style="font-size: 1.1rem; margin-top: 10px; line-height: 1.6; color: {text_secondary} !important; font-weight: 600;">
+                    Evaluate applicant financial indicators instantly. Calculate loan approval probability %, debt-to-income (DTI) caps, credit risk levels, and CIBIL score ratings with AI precision.
+                </p>
+            </div>
+            <div style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); color: #FFFFFF; width: 100px; height: 100px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);">
+                💳
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(f"<h3 style='color: {text_primary} !important;'>🌟 Key Feature Set</h3>", unsafe_allow_html=True)
     
     st.markdown(
-        """
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 12px;">
+        f"""
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 14px; margin-bottom: 28px;">
             <div class="enterprise-card">
-                <div style="font-size: 1.2rem; font-weight: 700; color: #111827; margin-bottom: 6px;">🤖 Gradient Boosting AI Engine</div>
-                <div style="font-size: 0.95rem; color: #4B5563;">Predicts loan approval probability with 95.0% validated accuracy based on 22 financial parameters.</div>
+                <div class="card-title-text">🤖 Gradient Boosting Model</div>
+                <div class="card-body-text">Predicts loan approval probability based on monthly income, existing EMIs, DTI ratio, and credit history variables.</div>
             </div>
             <div class="enterprise-card">
-                <div style="font-size: 1.2rem; font-weight: 700; color: #111827; margin-bottom: 6px;">🧮 Interactive CIBIL Estimator</div>
-                <div style="font-size: 0.95rem; color: #4B5563;">Calculates credit score breakdown from payment history, credit card utilization, and hard inquiries.</div>
+                <div class="card-title-text">📈 CIBIL Score Estimator</div>
+                <div class="card-body-text">Simulates credit score ratings (300 to 900) based on payment history, utilization ratio, credit age, and hard inquiries.</div>
             </div>
             <div class="enterprise-card">
-                <div style="font-size: 1.2rem; font-weight: 700; color: #111827; margin-bottom: 6px;">📊 Cashflow & Risk Diagnostics</div>
-                <div style="font-size: 0.95rem; color: #4B5563;">Computes DTI ratio, interest rate estimates, allowable loan limits, and personalized financial tips.</div>
+                <div class="card-title-text">📊 Risk & Cashflow Diagnostics</div>
+                <div class="card-body-text">Computes Debt-to-Income (DTI) ratio, recommends allowable loan ceilings, estimates monthly EMIs, and provides risk tips.</div>
             </div>
         </div>
         """,
@@ -215,19 +145,38 @@ else:
     )
 
     st.markdown("---")
-    st.markdown("### 🚀 Get Started Now")
+    st.markdown(f"<h3 style='text-align: center; margin-bottom: 20px; color: {text_primary} !important;'>🚀 Get Started Now</h3>", unsafe_allow_html=True)
 
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
-        if st.button("📝 Run New Loan Prediction Assessment", use_container_width=True):
-            st.session_state["current_page"] = "LoanPrediction"
+        if st.button("📝 Run New Loan Prediction Assessment", key="home_nav_pred_btn", use_container_width=True):
+            st.session_state["current_page"] = PAGE_LOAN_PRED
             st.rerun()
     with btn_col2:
-        if not is_logged_in:
-            if st.button("🔑 Account Login / Sign Up", use_container_width=True):
-                st.session_state["current_page"] = "Login"
-                st.rerun()
-        else:
-            if st.button("📊 Access Personal Executive Dashboard", use_container_width=True):
-                st.session_state["current_page"] = "Dashboard"
-                st.rerun()
+        if st.button("📈 Calculate CIBIL Score", key="home_nav_cibil_btn", use_container_width=True):
+            st.session_state["current_page"] = PAGE_CIBIL
+            st.rerun()
+
+# Router Execution
+selected_page = st.session_state.get("current_page", PAGE_HOME)
+
+if not st.session_state.get("startup_done", False):
+    render_loading_screen()
+    st.rerun()
+
+ROUTES = {
+    PAGE_HOME:      render_home_page,
+    PAGE_LOAN_PRED: render_loan_pred,
+    PAGE_CIBIL:     render_cibil_calc,
+    PAGE_ABOUT:     render_about,
+    PAGE_DEVELOPER: render_developer,
+    PAGE_ADMIN:     render_admin,
+    PAGE_LOGIN:     render_login,
+    PAGE_REGISTER:  render_register,
+    PAGE_DASHBOARD: render_user_dashboard,
+    PAGE_HISTORY:   render_history,
+    PAGE_PROFILE:   render_profile,
+}
+
+render_view = ROUTES.get(selected_page, render_home_page)
+render_view()

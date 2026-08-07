@@ -1,96 +1,112 @@
 import streamlit as st
-import requests
 import pandas as pd
-from frontend.components.cards import render_banner, render_metric_card
-from frontend.components.charts import create_cibil_distribution_bar, create_risk_distribution_pie
+
+try:
+    from frontend.components.cards import render_banner, render_metric_card
+    from frontend.components.charts import create_cibil_distribution_bar
+    from frontend.services.user_service import get_user_prediction_history
+except ModuleNotFoundError:
+    from components.cards import render_banner, render_metric_card
+    from components.charts import create_cibil_distribution_bar
+    from services.user_service import get_user_prediction_history
 
 def render():
     user = st.session_state.get("user")
     if not user:
-        st.warning("Please log in to access your enterprise dashboard.")
-        if st.button("🔑 Account Login", use_container_width=True):
+        st.info("🔐 Please log in to access your user dashboard.")
+        if st.button("🔑 Account Login", key="dash_login_btn", use_container_width=True):
             st.session_state["current_page"] = "Login"
             st.rerun()
         return
 
+    is_dark = st.session_state.get("theme", "light") == "dark"
+    text_color = "#FFFFFF" if is_dark else "#0F172A"
+
     render_banner(
-        title=f"Executive Dashboard — Welcome, {user.get('name')}!",
-        subtitle="Real-time monitoring of loan predictions, credit scoring analytics, and portfolio performance.",
-        icon="📊"
+        title=f"User Dashboard — Welcome, {user.get('name', 'Applicant')}!",
+        subtitle="View your loan application status, credit score analytics, EMI details, and prediction history.",
+        icon="👤"
     )
 
-    token = st.session_state.get("token")
+    # Fetch User Prediction History via FastAPI user service
+    success, predictions, err = get_user_prediction_history()
+    if not success and err:
+        st.error(f"❌ Error fetching history: {err}")
 
-    # Fetch User Prediction History via REST API
-    predictions = []
-    try:
-        try:
-            from frontend.config import API_URL
-        except ModuleNotFoundError:
-            from config import API_URL
-        headers = {"Authorization": f"Bearer {token}"} if token else {}
-        res = requests.get(f"{API_URL}/api/predict/history", headers=headers, timeout=10)
-        if res.status_code == 200:
-            predictions = res.json().get("data", [])
-        else:
-            predictions = []
-    except Exception:
-        predictions = []
-
+    # Metrics computation from real database records
     total_preds = len(predictions)
-    approved_preds = [p for p in predictions if p.get("result", {}).get("approved") or p.get("result", {}).get("loan_status") == "Approved"]
-    approved_count = len(approved_preds)
-    rejected_count = total_preds - approved_count
-    cibil_scores = [int(p.get("result", {}).get("cibil_score") or p.get("inputData", {}).get("CIBILScore", 720)) for p in predictions]
-    avg_cibil = int(sum(cibil_scores) / max(1, len(cibil_scores))) if cibil_scores else int(user.get("cibil_score", 720))
+    recent_pred = predictions[0] if predictions else None
 
-    # Top 5 KPI Metric Cards
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        render_metric_card("Total Predictions", str(total_preds), "Portfolio Inferences", "#1E3A8A", "📋")
-    with col2:
-        render_metric_card("Approved Loans", str(approved_count), f"{round(approved_count/max(1,total_preds)*100)}% Approval Rate", "#16A34A", "✅")
-    with col3:
-        render_metric_card("Rejected Loans", str(rejected_count), f"{round(rejected_count/max(1,total_preds)*100)}% Risk Flagged", "#DC2626", "❌")
-    with col4:
-        render_metric_card("Avg CIBIL Score", str(avg_cibil), "Portfolio Credit Rating", "#0EA5E9", "📈")
-    with col5:
-        render_metric_card("Model Accuracy", "95.0%", "Gradient Boosting Trained", "#F59E0B", "🎯")
+    if recent_pred:
+        res_obj = recent_pred.get("result", {})
+        inp_obj = recent_pred.get("inputData", {})
+        
+        recent_loan_type = res_obj.get("loan_type", inp_obj.get("LoanType", "Personal Loan"))
+        recent_status = res_obj.get("loan_status", "Approved" if res_obj.get("approved") else "Rejected")
+        recent_cibil = res_obj.get("cibil_score", inp_obj.get("CIBILScore", "N/A"))
+        recent_emi = f"₹{res_obj.get('emi_estimate', 0):,.2f}" if res_obj.get("emi_estimate") else "N/A"
+        recent_prob = f"{res_obj.get('approval_probability', 0):.1f}%"
+        recent_amount = f"₹{float(res_obj.get('loan_amount', inp_obj.get('LoanAmount', 0))):,.0f}"
+    else:
+        recent_loan_type = "No Applications"
+        recent_status = "No Records"
+        recent_cibil = "N/A"
+        recent_emi = "N/A"
+        recent_prob = "N/A"
+        recent_amount = "N/A"
 
+    # Display Top Overview Cards
+    c1, c2, c3, c4, c5 = st.columns(5)
+    with c1:
+        render_metric_card("Recent Loan", recent_loan_type, f"Amount: {recent_amount}", "#1E3A8A", "🏠")
+    with c2:
+        render_metric_card("Credit Score", str(recent_cibil), "Latest Bureau Score", "#0EA5E9", "📈")
+    with c3:
+        render_metric_card("Monthly EMI", recent_emi, "Estimated Obligation", "#2563EB", "💳")
+    with c4:
+        render_metric_card("Approval Prob.", recent_prob, "AI Probability Score", "#16A34A", "🎯")
+    with c5:
+        render_metric_card("Loan Status", recent_status, f"Total Applications: {total_preds}", "#F59E0B", "📜")
+
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("---")
 
-    # Charts Row
-    chart_col1, chart_col2 = st.columns(2)
-    with chart_col1:
-        st.plotly_chart(create_risk_distribution_pie(approved_count, rejected_count), use_container_width=True)
-    with chart_col2:
-        st.plotly_chart(create_cibil_distribution_bar(predictions), use_container_width=True)
-
-    st.markdown("---")
-    st.markdown("### 📜 Recent Predictions Audit Table")
+    # Prediction History Section
+    st.markdown(f"<h3 style='color: {text_color} !important;'>📜 Prediction History</h3>", unsafe_allow_html=True)
 
     if not predictions:
-        st.info("No prediction history recorded yet. Click below to run your first loan application assessment.")
-        if st.button("🚀 Run New Loan Prediction Assessment", use_container_width=True):
+        st.info("ℹ️ No prediction history available. Apply for a loan to view your credit risk analysis here.")
+        if st.button("🚀 Apply for a New Loan", key="dash_apply_btn", use_container_width=True):
             st.session_state["current_page"] = "LoanPrediction"
             st.rerun()
     else:
-        recent_rows = []
-        for p in predictions[:8]:
+        history_rows = []
+        for p in predictions:
             inp = p.get("inputData", {})
             res = p.get("result", {})
             approved = res.get("approved") or res.get("loan_status") == "Approved"
-            recent_rows.append({
+            
+            history_rows.append({
                 "Prediction ID": str(p.get("id") or p.get("_id")),
-                "Applicant": inp.get("fullName", "N/A"),
-                "Loan Amount": f"₹{float(inp.get('LoanAmount') or inp.get('loanAmount') or 0):,.0f}",
-                "CIBIL Score": res.get("cibil_score", inp.get("CIBILScore", 0)),
+                "Loan Type": res.get("loan_type", inp.get("LoanType", "Loan")),
+                "Amount": f"₹{float(res.get('loan_amount', inp.get('LoanAmount', 0))):,.0f}",
                 "Status": "Approved ✅" if approved else "Rejected ❌",
-                "Probability": f"{res.get('approval_probability', 0)}%",
-                "Risk Level": res.get("credit_risk_level", "N/A"),
-                "Created Date": str(p.get("createdAt"))[:19]
+                "Credit Score": res.get("cibil_score", inp.get("CIBILScore", "N/A")),
+                "Monthly EMI": f"₹{res.get('emi_estimate', 0):,.2f}",
+                "Probability": f"{res.get('approval_probability', 0):.1f}%",
+                "Date": str(p.get("createdAt", ""))[:19]
             })
 
-        df_recent = pd.DataFrame(recent_rows)
-        st.dataframe(df_recent, use_container_width=True)
+        df_history = pd.DataFrame(history_rows)
+        st.dataframe(df_history, use_container_width=True)
 
+    st.markdown("---")
+    b1, b2 = st.columns(2)
+    with b1:
+        if st.button("📝 Apply for Another Loan", key="user_dash_new_pred", use_container_width=True):
+            st.session_state["current_page"] = "LoanPrediction"
+            st.rerun()
+    with b2:
+        if st.button("👤 View / Edit Profile", key="user_dash_profile", use_container_width=True):
+            st.session_state["current_page"] = "Profile"
+            st.rerun()

@@ -25,6 +25,7 @@ async def register_user(user_data: dict) -> dict:
         "role": user_data.get("role", "user"),
         "phone": user_data.get("phone", ""),
         "occupation": user_data.get("occupation", ""),
+        "isActive": True,
         "createdAt": datetime.utcnow(),
         "updatedAt": datetime.utcnow()
     }
@@ -38,21 +39,28 @@ async def register_user(user_data: dict) -> dict:
 
     logger.info(f"User registered successfully: {user_doc['email']}")
 
-    # Formatted response matching React frontend expectations
+    user_obj = {
+        "id": user_id,
+        "_id": user_id,
+        "name": user_doc["name"],
+        "email": user_doc["email"],
+        "role": user_doc["role"],
+        "createdAt": user_doc["createdAt"].isoformat()
+    }
+
     return {
         "success": True,
-        "message": "User registered successfully",
+        "message": "Registration successful",
+        "access_token": token,
+        "token_type": "bearer",
+        "token": token,
+        "user": user_obj,
         "data": {
             "token": token,
+            "access_token": token,
+            "token_type": "bearer",
             "refreshToken": refresh_token,
-            "user": {
-                "id": user_id,
-                "_id": user_id,
-                "name": user_doc["name"],
-                "email": user_doc["email"],
-                "role": user_doc["role"],
-                "createdAt": user_doc["createdAt"].isoformat()
-            }
+            "user": user_obj
         }
     }
 
@@ -73,21 +81,41 @@ async def login_user(login_data: dict) -> dict:
     token = create_access_token({"id": user_id, "email": user["email"], "role": user.get("role", "user")})
     refresh_token = create_refresh_token({"id": user_id, "email": user["email"]})
 
+    # Log login activity
+    try:
+        from app.services.activity_log_service import log_activity
+        await log_activity(
+            action="User Login",
+            actor_id=user_id,
+            actor_name=user.get("name", "User"),
+            metadata={"email": user["email"], "role": user.get("role", "user")}
+        )
+    except Exception:
+        pass
+
     logger.info(f"User logged in successfully: {user['email']}")
+
+    user_obj = {
+        "id": user_id,
+        "_id": user_id,
+        "name": user.get("name"),
+        "email": user.get("email"),
+        "role": user.get("role", "user")
+    }
 
     return {
         "success": True,
         "message": "Login successful",
+        "access_token": token,
+        "token_type": "bearer",
+        "token": token,
+        "user": user_obj,
         "data": {
             "token": token,
+            "access_token": token,
+            "token_type": "bearer",
             "refreshToken": refresh_token,
-            "user": {
-                "id": user_id,
-                "_id": user_id,
-                "name": user.get("name"),
-                "email": user.get("email"),
-                "role": user.get("role", "user")
-            }
+            "user": user_obj
         }
     }
 
@@ -107,16 +135,23 @@ async def refresh_user_token(refresh_token_str: str) -> dict:
         raise HTTPException(status_code=404, detail="User not found")
 
     new_token = create_access_token({"id": str(user["_id"]), "email": user["email"], "role": user.get("role", "user")})
+    user_obj = {
+        "id": str(user["_id"]),
+        "_id": str(user["_id"]),
+        "name": user.get("name"),
+        "email": user.get("email"),
+        "role": user.get("role", "user")
+    }
     return {
         "success": True,
+        "access_token": new_token,
+        "token_type": "bearer",
+        "token": new_token,
+        "user": user_obj,
         "data": {
             "token": new_token,
-            "user": {
-                "id": str(user["_id"]),
-                "_id": str(user["_id"]),
-                "name": user.get("name"),
-                "email": user.get("email"),
-                "role": user.get("role", "user")
-            }
+            "access_token": new_token,
+            "token_type": "bearer",
+            "user": user_obj
         }
     }

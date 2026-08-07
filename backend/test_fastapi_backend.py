@@ -18,11 +18,12 @@ def safe_print(text: str):
         clean_text = text.encode('ascii', 'ignore').decode('ascii')
         print(clean_text)
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add root project directory to sys.path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.config.settings import settings
-from app.database.connection import connect_to_mongo, close_mongo_connection, db_manager
-from app.ml.predictor import ml_predictor
+from backend.config import settings
+from backend.database.connection import connect_to_mongo, close_mongo_connection, db_manager
+from ml.predictor import ml_predictor
 
 async def test_fastapi_backend_suite():
     safe_print("==================================================")

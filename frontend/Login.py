@@ -1,61 +1,66 @@
 import streamlit as st
-import requests
+
+try:
+    from frontend.services.auth_service import login
+except ModuleNotFoundError:
+    from services.auth_service import login
 
 def render():
-    st.markdown("<h2 style='color: #111827;'>🔑 Enterprise User Authentication</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #4B5563; font-size: 0.95rem;'>Sign in to access your loan predictions, credit history, and analytics dashboard.</p>", unsafe_allow_html=True)
+    is_dark = st.session_state.get("theme", "light") == "dark"
+    card_bg = "#1E293B" if is_dark else "#FFFFFF"
+    border_c = "#334155" if is_dark else "#CBD5E1"
+    text_color = "#FFFFFF" if is_dark else "#0F172A"
+    sub_color = "#94A3B8" if is_dark else "#475569"
 
-    col1, col2 = st.columns([1.1, 1])
+    st.markdown(f"<h2 style='color: {text_color} !important;'>🔑 Enterprise User Authentication</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: {sub_color} !important; font-size: 0.95rem;'>Sign in to access your loan predictions, credit history, and analytics dashboard.</p>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns([1.2, 1], gap="medium")
 
     with col1:
         with st.form("login_enterprise_form"):
-            st.markdown("<h4 style='color: #111827;'>Sign In to Your Account</h4>", unsafe_allow_html=True)
+            st.markdown(f"<h4 style='color: {text_color} !important;'>Sign In to Your Account</h4>", unsafe_allow_html=True)
             email = st.text_input("Email Address *", placeholder="user@example.com")
             password = st.text_input("Password *", type="password", placeholder="••••••••")
-            submit = st.form_submit_button("Sign In to Portal", use_container_width=True)
+            
+            b_col1, b_col2 = st.columns(2)
+            with b_col1:
+                submit = st.form_submit_button("Sign In to Portal", use_container_width=True)
+            with b_col2:
+                reg_nav_btn = st.form_submit_button("Register New Account", use_container_width=True)
+
+            if reg_nav_btn:
+                st.session_state["current_page"] = "Register"
+                st.rerun()
 
             if submit:
                 if not email or not password:
+                    st.toast("⚠️ Please enter both email address and password.", icon="⚠️")
                     st.error("Please enter both email address and password.")
                 else:
-                    try:
-                        try:
-                            from frontend.config import API_URL
-                        except ModuleNotFoundError:
-                            from config import API_URL
-                        backend_url = f"{API_URL}/api/auth/login"
-                        res = requests.post(backend_url, json={"email": email, "password": password}, timeout=10)
-                        
-                        if res.status_code == 200:
-                            data = res.json()
-                            st.session_state["token"] = data.get("access_token") or data.get("token")
-                            st.session_state["user"] = data.get("user")
-                            st.session_state["current_page"] = "Dashboard"
-                            st.success("✅ Login successful! Redirecting to Executive Dashboard...")
-                            st.rerun()
+                    success, res, err = login(email, password)
+                    if success:
+                        st.toast("✅ Login successful!", icon="🎉")
+                        user_role = st.session_state.get("role", "user")
+                        if user_role == "admin":
+                            st.session_state["current_page"] = "AdminDashboard"
                         else:
-                            try:
-                                err_msg = res.json().get("detail", "Invalid login credentials.")
-                            except Exception:
-                                err_msg = "Invalid login credentials."
-                            st.error(f"❌ {err_msg}")
-                    except Exception as ex:
-                        st.error(f"❌ Unable to connect to authentication server at {API_URL}. Details: {ex}")
+                            st.session_state["current_page"] = "Dashboard"
+                        st.rerun()
+                    else:
+                        st.toast(f"❌ Login failed: {err}", icon="🚨")
+                        st.error(f"❌ Login failed: {err}")
 
     with col2:
         st.markdown(
-            """
-            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; padding: 22px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                <div style="font-size: 1.1rem; font-weight: 700; color: #111827; margin-bottom: 8px;">💡 Demo User Credentials</div>
-                <div style="font-size: 0.9rem; color: #111827; margin-bottom: 6px;"><b>Admin Account:</b> <code>admin@loanpredictor.com</code> / <code>admin123</code></div>
-                <div style="font-size: 0.9rem; color: #111827; margin-bottom: 14px;"><b>Regular Account:</b> <code>user@example.com</code> / <code>user123</code></div>
-                <div style="font-size: 0.85rem; color: #4B5563; margin-bottom: 12px;">Don't have an account? Click below to register a new account!</div>
+            f"""
+            <div style="background: {card_bg}; border: 2px solid {border_c}; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                <div style="font-size: 1.1rem; font-weight: 800; color: {text_color} !important; margin-bottom: 12px;">🛡️ Secure Portal Access</div>
+                <p style="font-size: 0.95rem; color: {sub_color} !important; margin-bottom: 16px; line-height: 1.6;">
+                    Log in with your registered user credentials or admin account to view live credit reports, real-time MongoDB analytics, and past loan applications.
+                </p>
+                <div style="font-size: 0.85rem; color: {sub_color} !important; margin-bottom: 14px;">Don't have an account yet? Click Register above!</div>
             </div>
             """,
             unsafe_allow_html=True
         )
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("📝 Create a New Account", use_container_width=True):
-            st.session_state["current_page"] = "Register"
-            st.rerun()
-

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 from backend.schemas.auth import RegisterSchema, LoginSchema
-from backend.services.auth_service import register_user, login_user
+from backend.services.auth_service import register_user, login_user, refresh_user_token
 from backend.auth.jwt import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -12,6 +12,14 @@ async def register(payload: RegisterSchema):
 @router.post("/login")
 async def login(payload: LoginSchema):
     return await login_user(payload.model_dump())
+
+@router.post("/logout")
+async def logout():
+    return {"success": True, "message": "Logged out successfully"}
+
+@router.post("/refresh")
+async def refresh(token: str = Body(..., embed=True)):
+    return await refresh_user_token(token)
 
 @router.get("/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
