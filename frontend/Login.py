@@ -1,8 +1,5 @@
 import streamlit as st
 import requests
-import asyncio
-from backend.config import settings
-from backend.services.auth_service import login_user
 
 def render():
     st.markdown("<h2 style='color: #111827;'>🔑 Enterprise User Authentication</h2>", unsafe_allow_html=True)
@@ -20,36 +17,30 @@ def render():
             if submit:
                 if not email or not password:
                     st.error("Please enter both email address and password.")
-                    return
-
-                try:
+                else:
                     try:
-                        from frontend.config import API_URL
-                    except ModuleNotFoundError:
-                        from config import API_URL
-                    backend_url = f"{API_URL}/api/auth/login"
-                    res = requests.post(backend_url, json={"email": email, "password": password}, timeout=5)
-                    
-                    if res.status_code == 200:
-                        data = res.json()
-                        st.session_state["token"] = data.get("access_token") or data.get("token")
-                        st.session_state["user"] = data.get("user")
-                        st.success("✅ Login successful! Redirecting...")
-                        st.rerun()
-                    else:
-                        err_msg = res.json().get("detail", "Invalid login credentials.")
-                        st.error(f"❌ {err_msg}")
-                except Exception:
-                    try:
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        data = loop.run_until_complete(login_user({"email": email, "password": password}))
-                        st.session_state["token"] = data.get("access_token") or data.get("token")
-                        st.session_state["user"] = data.get("user")
-                        st.success("✅ Login successful!")
-                        st.rerun()
+                        try:
+                            from frontend.config import API_URL
+                        except ModuleNotFoundError:
+                            from config import API_URL
+                        backend_url = f"{API_URL}/api/auth/login"
+                        res = requests.post(backend_url, json={"email": email, "password": password}, timeout=10)
+                        
+                        if res.status_code == 200:
+                            data = res.json()
+                            st.session_state["token"] = data.get("access_token") or data.get("token")
+                            st.session_state["user"] = data.get("user")
+                            st.session_state["current_page"] = "Dashboard"
+                            st.success("✅ Login successful! Redirecting to Executive Dashboard...")
+                            st.rerun()
+                        else:
+                            try:
+                                err_msg = res.json().get("detail", "Invalid login credentials.")
+                            except Exception:
+                                err_msg = "Invalid login credentials."
+                            st.error(f"❌ {err_msg}")
                     except Exception as ex:
-                        st.error(f"❌ Login failed: {ex}")
+                        st.error(f"❌ Unable to connect to authentication server at {API_URL}. Details: {ex}")
 
     with col2:
         st.markdown(
@@ -58,8 +49,13 @@ def render():
                 <div style="font-size: 1.1rem; font-weight: 700; color: #111827; margin-bottom: 8px;">💡 Demo User Credentials</div>
                 <div style="font-size: 0.9rem; color: #111827; margin-bottom: 6px;"><b>Admin Account:</b> <code>admin@loanpredictor.com</code> / <code>admin123</code></div>
                 <div style="font-size: 0.9rem; color: #111827; margin-bottom: 14px;"><b>Regular Account:</b> <code>user@example.com</code> / <code>user123</code></div>
-                <div style="font-size: 0.85rem; color: #4B5563;">Don't have an account? Select <b>Register</b> in the sidebar menu!</div>
+                <div style="font-size: 0.85rem; color: #4B5563; margin-bottom: 12px;">Don't have an account? Click below to register a new account!</div>
             </div>
             """,
             unsafe_allow_html=True
         )
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("📝 Create a New Account", use_container_width=True):
+            st.session_state["current_page"] = "Register"
+            st.rerun()
+

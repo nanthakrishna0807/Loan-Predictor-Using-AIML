@@ -1,14 +1,14 @@
 import streamlit as st
 import requests
-import asyncio
-from backend.config import settings
-from backend.services.user_service import update_user_profile
 from frontend.components.cards import render_banner, render_metric_card
 
 def render():
     user = st.session_state.get("user")
     if not user:
         st.warning("Please log in to manage your profile.")
+        if st.button("🔑 Account Login", use_container_width=True):
+            st.session_state["current_page"] = "Login"
+            st.rerun()
         return
 
     render_banner(
@@ -18,7 +18,6 @@ def render():
     )
 
     token = st.session_state.get("token")
-    user_id = str(user.get("_id") or user.get("id"))
 
     col1, col2 = st.columns([1, 1])
 
@@ -35,7 +34,10 @@ def render():
         with st.form("edit_profile_form"):
             new_name = st.text_input("Full Name", value=user.get("name", ""))
             new_phone = st.text_input("Phone Number", value=user.get("phone", ""))
-            new_occ = st.selectbox("Occupation Category", ["Salaried", "Self-Employed", "Business", "Student", "Other"], index=0)
+            occ_list = ["Salaried", "Self-Employed", "Business", "Student", "Other"]
+            curr_occ = user.get("occupation", "Salaried")
+            occ_idx = occ_list.index(curr_occ) if curr_occ in occ_list else 0
+            new_occ = st.selectbox("Occupation Category", occ_list, index=occ_idx)
             new_inc = st.number_input("Monthly Income (₹)", value=float(user.get("monthly_income", 50000.0)))
             new_cibil = st.number_input("Target CIBIL Score", min_value=300, max_value=900, value=int(user.get("cibil_score", 720)))
 
@@ -64,22 +66,18 @@ def render():
                     except ModuleNotFoundError:
                         from config import API_URL
                     headers = {"Authorization": f"Bearer {token}"} if token else {}
-                    res = requests.put(f"{API_URL}/api/users/profile", json=payload, headers=headers, timeout=5)
+                    res = requests.put(f"{API_URL}/api/users/profile", json=payload, headers=headers, timeout=10)
                     if res.status_code == 200:
                         updated_user = res.json().get("user")
                         st.session_state["user"] = updated_user
                         st.success("✅ Profile updated successfully!")
                         st.rerun()
                     else:
-                        err_msg = res.json().get("detail", "Update failed.")
+                        try:
+                            err_msg = res.json().get("detail", "Update failed.")
+                        except Exception:
+                            err_msg = "Update failed."
                         st.error(f"❌ {err_msg}")
-                except Exception:
-                    try:
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        res_obj = loop.run_until_complete(update_user_profile(user_id, payload))
-                        st.session_state["user"] = res_obj.get("user")
-                        st.success("✅ Profile updated successfully!")
-                        st.rerun()
-                    except Exception as ex:
-                        st.error(f"❌ Profile update error: {ex}")
+                except Exception as ex:
+                    st.error(f"❌ Profile update error: {ex}")
+

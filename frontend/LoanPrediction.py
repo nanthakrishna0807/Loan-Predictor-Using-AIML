@@ -1,8 +1,5 @@
 import streamlit as st
 import requests
-import asyncio
-from backend.config import settings
-from backend.services.prediction_service import create_prediction
 from frontend.components.cards import render_banner, render_status_badge, render_metric_card, render_tip_box
 from frontend.components.charts import create_approval_meter, create_cibil_gauge, create_income_vs_emi_chart
 from frontend.components.cibil_widget import render_cibil_calculator_widget
@@ -156,7 +153,6 @@ def render():
 
         with st.spinner("Processing applicant parameters through Gradient Boosting AI model..."):
             token = st.session_state.get("token")
-            user_id = str(user.get("_id") or user.get("id")) if user else None
 
             result_data = None
             try:
@@ -165,23 +161,20 @@ def render():
                 except ModuleNotFoundError:
                     from config import API_URL
                 headers = {"Authorization": f"Bearer {token}"} if token else {}
-                res = requests.post(f"{API_URL}/api/predict/loan", json=payload, headers=headers, timeout=5)
+                res = requests.post(f"{API_URL}/api/predict/loan", json=payload, headers=headers, timeout=15)
                 if res.status_code == 200:
                     result_data = res.json().get("data") or res.json().get("result")
                 else:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    res_obj = loop.run_until_complete(create_prediction(payload, user_id))
-                    result_data = res_obj.get("data")
-            except Exception:
-                try:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    res_obj = loop.run_until_complete(create_prediction(payload, user_id))
-                    result_data = res_obj.get("data")
-                except Exception as ex:
-                    st.error(f"Prediction Error: {ex}")
+                    try:
+                        err_detail = res.json().get("detail") or res.json().get("message", "Prediction failed.")
+                    except Exception:
+                        err_detail = "Prediction failed."
+                    st.error(f"❌ Prediction Error: {err_detail}")
                     return
+            except Exception as ex:
+                st.error(f"❌ Prediction Error: Unable to communicate with backend API server at {API_URL}. Details: {ex}")
+                return
+
 
         if result_data:
             st.markdown("---")

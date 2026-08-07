@@ -1,8 +1,5 @@
 import streamlit as st
 import requests
-import asyncio
-from backend.config import settings
-from backend.services.auth_service import register_user
 
 def render():
     st.markdown("<h2 style='color: #111827;'>📝 Create New Account</h2>", unsafe_allow_html=True)
@@ -26,43 +23,40 @@ def render():
         if submit:
             if not name or not email or not password:
                 st.error("Please fill in all required fields marked with *.")
-                return
+            else:
+                payload = {
+                    "name": name,
+                    "email": email,
+                    "password": password,
+                    "role": role,
+                    "phone": phone,
+                    "occupation": occupation,
+                    "monthly_income": income
+                }
 
-            payload = {
-                "name": name,
-                "email": email,
-                "password": password,
-                "role": role,
-                "phone": phone,
-                "occupation": occupation,
-                "monthly_income": income
-            }
-
-            try:
                 try:
-                    from frontend.config import API_URL
-                except ModuleNotFoundError:
-                    from config import API_URL
-                backend_url = f"{API_URL}/api/auth/register"
-                res = requests.post(backend_url, json=payload, timeout=5)
-                
-                if res.status_code == 200:
-                    data = res.json()
-                    st.session_state["token"] = data.get("access_token") or data.get("token")
-                    st.session_state["user"] = data.get("user")
-                    st.success("🎉 Account created successfully!")
-                    st.rerun()
-                else:
-                    err_msg = res.json().get("detail", "Registration failed.")
-                    st.error(f"❌ {err_msg}")
-            except Exception:
-                try:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    data = loop.run_until_complete(register_user(payload))
-                    st.session_state["token"] = data.get("access_token") or data.get("token")
-                    st.session_state["user"] = data.get("user")
-                    st.success("🎉 Account created successfully!")
-                    st.rerun()
+                    try:
+                        from frontend.config import API_URL
+                    except ModuleNotFoundError:
+                        from config import API_URL
+                    backend_url = f"{API_URL}/api/auth/register"
+                    res = requests.post(backend_url, json=payload, timeout=10)
+                    
+                    if res.status_code == 200:
+                        st.success("🎉 Account created successfully! Please sign in.")
+                        st.session_state["current_page"] = "Login"
+                        st.rerun()
+                    else:
+                        try:
+                            err_msg = res.json().get("detail", "Registration failed.")
+                        except Exception:
+                            err_msg = "Registration failed."
+                        st.error(f"❌ {err_msg}")
                 except Exception as ex:
-                    st.error(f"❌ Registration error: {ex}")
+                    st.error(f"❌ Unable to connect to registration server at {API_URL}. Details: {ex}")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("🔑 Already Have an Account? Sign In", use_container_width=True):
+        st.session_state["current_page"] = "Login"
+        st.rerun()
+

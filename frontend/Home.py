@@ -35,6 +35,10 @@ if "user" not in st.session_state:
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "Home"
 
+user = st.session_state.get("user")
+is_logged_in = user is not None
+is_admin = is_logged_in and user.get("role") == "admin"
+
 # Sidebar Navigation (Crisp White Background, Dark #111827 Typography)
 with st.sidebar:
     st.markdown(
@@ -53,10 +57,6 @@ with st.sidebar:
     )
     st.markdown("---")
 
-    user = st.session_state.get("user")
-    is_logged_in = user is not None
-    is_admin = is_logged_in and user.get("role") == "admin"
-
     # User Profile Card in Sidebar
     if is_logged_in:
         st.markdown(
@@ -73,24 +73,16 @@ with st.sidebar:
             unsafe_allow_html=True
         )
 
-    nav_options = ["🏠 Home"]
+    # Define Navigation Options & Page Mappings
     if is_logged_in:
-        nav_options.extend(["📊 Dashboard", "📝 New Loan Prediction", "📜 Prediction History", "👤 My Profile"])
+        nav_options = ["🏠 Home", "📊 Dashboard", "📝 New Loan Prediction", "📜 Prediction History", "👤 My Profile"]
         if is_admin:
             nav_options.append("🛡️ Admin Dashboard")
         nav_options.append("🚪 Logout")
     else:
-        nav_options.extend(["🔑 Login", "📝 Register", "📝 Quick Prediction Form"])
+        nav_options = ["🏠 Home", "🔑 Login", "📝 Register", "📝 Quick Prediction Form"]
 
-    choice = st.radio("Enterprise Navigation", nav_options, index=0)
-
-    if choice == "🚪 Logout":
-        st.session_state["token"] = None
-        st.session_state["user"] = None
-        st.session_state["current_page"] = "Home"
-        st.rerun()
-
-    page_map = {
+    label_to_page = {
         "🏠 Home": "Home",
         "🔑 Login": "Login",
         "📝 Register": "Register",
@@ -102,30 +94,84 @@ with st.sidebar:
         "🛡️ Admin Dashboard": "AdminDashboard"
     }
 
-    selected_page = page_map.get(choice, "Home")
+    page_to_label = {
+        "Home": "🏠 Home",
+        "Login": "🔑 Login",
+        "Register": "📝 Register",
+        "Dashboard": "📊 Dashboard",
+        "LoanPrediction": "📝 New Loan Prediction" if is_logged_in else "📝 Quick Prediction Form",
+        "PredictionHistory": "📜 Prediction History",
+        "Profile": "👤 My Profile",
+        "AdminDashboard": "🛡️ Admin Dashboard"
+    }
+
+    current_page = st.session_state.get("current_page", "Home")
+    target_label = page_to_label.get(current_page, "🏠 Home")
+
+    if target_label in nav_options:
+        default_index = nav_options.index(target_label)
+    else:
+        default_index = 0
+        st.session_state["current_page"] = "Home"
+
+    choice = st.radio("Enterprise Navigation", nav_options, index=default_index, key="sidebar_nav_radio")
+
+    if choice == "🚪 Logout":
+        st.session_state["token"] = None
+        st.session_state["user"] = None
+        st.session_state["current_page"] = "Home"
+        st.rerun()
+
+    new_page = label_to_page.get(choice, "Home")
+    if new_page != st.session_state["current_page"]:
+        st.session_state["current_page"] = new_page
+        st.rerun()
+
+selected_page = st.session_state.get("current_page", "Home")
 
 # Main Page Content Routing
 if selected_page == "Login":
-    import frontend.Login as LoginModule
-    LoginModule.render()
+    try:
+        from frontend.Login import render as render_login
+    except ModuleNotFoundError:
+        from Login import render as render_login
+    render_login()
 elif selected_page == "Register":
-    import frontend.Register as RegisterModule
-    RegisterModule.render()
+    try:
+        from frontend.Register import render as render_register
+    except ModuleNotFoundError:
+        from Register import render as render_register
+    render_register()
 elif selected_page == "Dashboard":
-    import frontend.Dashboard as DashboardModule
-    DashboardModule.render()
+    try:
+        from frontend.Dashboard import render as render_dashboard
+    except ModuleNotFoundError:
+        from Dashboard import render as render_dashboard
+    render_dashboard()
 elif selected_page == "LoanPrediction":
-    import frontend.LoanPrediction as LoanPredModule
-    LoanPredModule.render()
+    try:
+        from frontend.LoanPrediction import render as render_loan_pred
+    except ModuleNotFoundError:
+        from LoanPrediction import render as render_loan_pred
+    render_loan_pred()
 elif selected_page == "PredictionHistory":
-    import frontend.PredictionHistory as HistoryModule
-    HistoryModule.render()
+    try:
+        from frontend.PredictionHistory import render as render_history
+    except ModuleNotFoundError:
+        from PredictionHistory import render as render_history
+    render_history()
 elif selected_page == "Profile":
-    import frontend.Profile as ProfileModule
-    ProfileModule.render()
+    try:
+        from frontend.Profile import render as render_profile
+    except ModuleNotFoundError:
+        from Profile import render as render_profile
+    render_profile()
 elif selected_page == "AdminDashboard":
-    import frontend.AdminDashboard as AdminModule
-    AdminModule.render()
+    try:
+        from frontend.AdminDashboard import render as render_admin
+    except ModuleNotFoundError:
+        from AdminDashboard import render as render_admin
+    render_admin()
 else:
     # Home Landing Page
     render_banner(

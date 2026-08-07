@@ -1,16 +1,16 @@
 import streamlit as st
 import pandas as pd
 import requests
-import asyncio
 import json
-from backend.config import settings
-from backend.services.prediction_service import get_user_predictions, delete_prediction_by_id
-from frontend.components.cards import render_banner, render_status_badge
+from frontend.components.cards import render_banner
 
 def render():
     user = st.session_state.get("user")
     if not user:
         st.warning("Please log in to access your prediction history.")
+        if st.button("🔑 Account Login", use_container_width=True):
+            st.session_state["current_page"] = "Login"
+            st.rerun()
         return
 
     render_banner(
@@ -20,9 +20,8 @@ def render():
     )
 
     token = st.session_state.get("token")
-    user_id = str(user.get("_id") or user.get("id"))
 
-    # Fetch User History
+    # Fetch User History via REST API
     predictions = []
     try:
         try:
@@ -30,22 +29,13 @@ def render():
         except ModuleNotFoundError:
             from config import API_URL
         headers = {"Authorization": f"Bearer {token}"} if token else {}
-        res = requests.get(f"{API_URL}/api/predict/history", headers=headers, timeout=5)
+        res = requests.get(f"{API_URL}/api/predict/history", headers=headers, timeout=10)
         if res.status_code == 200:
             predictions = res.json().get("data", [])
         else:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            res_data = loop.run_until_complete(get_user_predictions(user_id))
-            predictions = res_data.get("data", [])
-    except Exception:
-        try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            res_data = loop.run_until_complete(get_user_predictions(user_id))
-            predictions = res_data.get("data", [])
-        except Exception:
             predictions = []
+    except Exception:
+        predictions = []
 
     if not predictions:
         st.info("No prediction history recorded yet. Run a new prediction to populate your history!")
@@ -141,19 +131,12 @@ def render():
                     except ModuleNotFoundError:
                         from config import API_URL
                     headers = {"Authorization": f"Bearer {token}"} if token else {}
-                    res_del = requests.delete(f"{API_URL}/api/predict/{p_id}", headers=headers, timeout=4)
+                    res_del = requests.delete(f"{API_URL}/api/predict/{p_id}", headers=headers, timeout=10)
                     if res_del.status_code == 200:
                         st.success("Record deleted.")
                         st.rerun()
                     else:
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        loop.run_until_complete(delete_prediction_by_id(p_id, user_id))
-                        st.success("Record deleted.")
-                        st.rerun()
-                except Exception:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    loop.run_until_complete(delete_prediction_by_id(p_id, user_id))
-                    st.success("Record deleted.")
-                    st.rerun()
+                        st.error("Failed to delete record from database.")
+                except Exception as ex:
+                    st.error(f"Error deleting record: {ex}")
+
